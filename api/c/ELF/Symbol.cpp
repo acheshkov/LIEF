@@ -22,11 +22,23 @@ void init_c_dynamic_symbols(Elf_Binary_t* c_binary, Binary* binary) {
   Binary::it_dynamic_symbols dyn_symb = binary->dynamic_symbols();
 
   c_binary->dynamic_symbols = static_cast<Elf_Symbol_t**>(
-      malloc((dyn_symb.size() + 1) * sizeof(Elf_Symbol_t**)));
+      malloc((dyn_symb.size() + 1) * sizeof(Elf_Symbol_t*)));
+  if (!c_binary->dynamic_symbols) {
+    return; // Handle allocation failure
+  }
 
   for (size_t i = 0; i < dyn_symb.size(); ++i) {
     Symbol& b_sym = dyn_symb[i];
     c_binary->dynamic_symbols[i] = static_cast<Elf_Symbol_t*>(malloc(sizeof(Elf_Symbol_t)));
+    if (!c_binary->dynamic_symbols[i]) {
+      // Free previously allocated symbols in case of failure
+      for (size_t j = 0; j < i; ++j) {
+        free(c_binary->dynamic_symbols[j]);
+      }
+      free(c_binary->dynamic_symbols);
+      c_binary->dynamic_symbols = nullptr;
+      return;
+    }
     c_binary->dynamic_symbols[i]->name        = b_sym.name().c_str();
     c_binary->dynamic_symbols[i]->type        = static_cast<uint32_t>(b_sym.type());
     c_binary->dynamic_symbols[i]->binding     = static_cast<uint32_t>(b_sym.binding());
@@ -39,8 +51,8 @@ void init_c_dynamic_symbols(Elf_Binary_t* c_binary, Binary* binary) {
     c_binary->dynamic_symbols[i]->is_imported = b_sym.is_imported();
   }
   c_binary->dynamic_symbols[dyn_symb.size()] = nullptr;
-
 }
+
 
 
 void init_c_symtab_symbols(Elf_Binary_t* c_binary, Binary* binary) {
