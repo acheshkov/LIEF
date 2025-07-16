@@ -1050,10 +1050,11 @@ void Binary::patch_address(uint64_t address, const std::vector<uint8_t>& patch_v
   uint64_t rva = address;
 
   if (addr_type == VA_TYPES::VA || addr_type == VA_TYPES::AUTO) {
-    const int64_t delta = address - optional_header().imagebase();
+    const uint64_t image_base = optional_header().imagebase();
+    int64_t delta = static_cast<int64_t>(address - image_base);
 
     if (delta > 0 || addr_type == LIEF::Binary::VA_TYPES::VA) {
-      rva -= optional_header().imagebase();
+      rva -= image_base;
     }
   }
 
@@ -1075,6 +1076,7 @@ void Binary::patch_address(uint64_t address, const std::vector<uint8_t>& patch_v
             content.data() + offset);
 
 }
+
 
 void Binary::patch_address(uint64_t address, uint64_t patch_value,
                            size_t size, LIEF::Binary::VA_TYPES addr_type) {
