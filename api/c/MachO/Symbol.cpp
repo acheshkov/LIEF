@@ -21,7 +21,7 @@ void init_c_symbols(Macho_Binary_t* c_binary, Binary* binary) {
   Binary::it_symbols symbols = binary->symbols();
 
   c_binary->symbols = static_cast<Macho_Symbol_t**>(
-      malloc((symbols.size() + 1) * sizeof(Macho_Symbol_t**)));
+      malloc((symbols.size() + 1) * sizeof(Macho_Symbol_t*)));
 
   for (size_t i = 0; i < symbols.size(); ++i) {
     const Symbol& symbol = symbols[i];
@@ -36,8 +36,8 @@ void init_c_symbols(Macho_Binary_t* c_binary, Binary* binary) {
   }
 
   c_binary->symbols[symbols.size()] = nullptr;
-
 }
+
 
 
 
