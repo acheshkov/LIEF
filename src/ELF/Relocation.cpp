@@ -215,179 +215,172 @@ result<uint64_t> Relocation::resolve(uint64_t base_address) const {
 
   switch (type()) {
     /* X86_64 { */
-      /* See ELF x86-64-ABI psABI[1] for the reference
-       *
-       * [1]: https://gitlab.com/x86-psABIs/x86-64-ABI
-       */
-      case TYPE::X86_64_NONE:
-        return Q();
-      case TYPE::X86_64_64:
-      case TYPE::X86_64_DTPOFF32:
-      case TYPE::X86_64_DTPOFF64:
-        return S + A;
-      case TYPE::X86_64_PC32:
-      case TYPE::X86_64_PC64:
-        return S + A - P;
-      case TYPE::X86_64_32:
-      case TYPE::X86_64_32S:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::X86_64_GLOB_DAT:
-      case TYPE::X86_64_JUMP_SLOT:
-        return S;
-      case TYPE::X86_64_RELATIVE:
-        return B + A;
-      case TYPE::X86_64_RELATIVE64:
-        return B + A;
+    case TYPE::X86_64_NONE:
+      return Q();
+    case TYPE::X86_64_64:
+    case TYPE::X86_64_DTPOFF32:
+    case TYPE::X86_64_DTPOFF64:
+      return S + A;
+    case TYPE::X86_64_PC32:
+    case TYPE::X86_64_PC64:
+      return S + A - P;
+    case TYPE::X86_64_32:
+    case TYPE::X86_64_32S:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::X86_64_GLOB_DAT:
+    case TYPE::X86_64_JUMP_SLOT:
+      return S;
+    case TYPE::X86_64_RELATIVE:
+    case TYPE::X86_64_RELATIVE64:
+      return B + A;
     /* } */
 
     /* X86 { */
-      case TYPE::X86_NONE:
-        return Q();
-      case TYPE::X86_32:
-        return S + Q();
-      case TYPE::X86_PC32:
-        return S - P + Q();
-      case TYPE::X86_GLOB_DAT:
-      case TYPE::X86_JUMP_SLOT:
-        return S;
-      case TYPE::X86_RELATIVE:
-        return B + Q();
+    case TYPE::X86_NONE:
+      return Q();
+    case TYPE::X86_32:
+      return S + Q();
+    case TYPE::X86_PC32:
+      return S - P + Q();
+    case TYPE::X86_GLOB_DAT:
+    case TYPE::X86_JUMP_SLOT:
+      return S;
+    case TYPE::X86_RELATIVE:
+      return B + Q();
     /* } */
 
     /* AArc64 { */
-      case TYPE::AARCH64_ABS32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::AARCH64_ABS64:
-        return S + A;
-      case TYPE::AARCH64_PREL16:
-        return (S + A - P) & 0xFFFF;
-      case TYPE::AARCH64_PREL32:
-        return (S + A - P) & 0xFFFFFFFF;
-      case TYPE::AARCH64_PREL64:
-        return S + A - P;
-      case TYPE::AARCH64_GLOB_DAT:
-      case TYPE::AARCH64_JUMP_SLOT:
-        return S;
-      case TYPE::AARCH64_RELATIVE:
-        return B + A;
+    case TYPE::AARCH64_ABS32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::AARCH64_ABS64:
+      return S + A;
+    case TYPE::AARCH64_PREL16:
+      return (S + A - P) & 0xFFFF;
+    case TYPE::AARCH64_PREL32:
+      return (S + A - P) & 0xFFFFFFFF;
+    case TYPE::AARCH64_PREL64:
+      return S + A - P;
+    case TYPE::AARCH64_GLOB_DAT:
+    case TYPE::AARCH64_JUMP_SLOT:
+      return S;
+    case TYPE::AARCH64_RELATIVE:
+      return B + A;
     /* } */
 
     /* ARM { */
-      case TYPE::ARM_ABS32:
-        return (S + Q() + A) & 0xFFFFFFFF;
-      case TYPE::ARM_REL32:
-        return (S + Q() + A - P) & 0xFFFFFFFF;
-      case TYPE::ARM_GLOB_DAT:
-      case TYPE::ARM_JUMP_SLOT:
-        return S;
-      case TYPE::ARM_RELATIVE:
-        return B + Q();
+    case TYPE::ARM_ABS32:
+      return (uint32_t)(S + Q() + A);
+    case TYPE::ARM_REL32:
+      return (uint32_t)(S + Q() + A - P);
+    case TYPE::ARM_GLOB_DAT:
+    case TYPE::ARM_JUMP_SLOT:
+      return S;
+    case TYPE::ARM_RELATIVE:
+      return B + Q();
     /* } */
 
-
     /* eBPF { */
-      case TYPE::BPF_64_ABS32:
-        return (S + Q()) & 0xFFFFFFFF;
-
-      case TYPE::BPF_64_ABS64:
-        return S + Q();
+    case TYPE::BPF_64_ABS32:
+      return (S + Q()) & 0xFFFFFFFF;
+    case TYPE::BPF_64_ABS64:
+      return S + Q();
     /* } */
 
     /* MIPS { */
-      case TYPE::MIPS_32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::MIPS_64:
-        return S + A;
-      case TYPE::MIPS_TLS_DTPREL64:
-        return S + A - 0x8000;
-      case TYPE::MIPS_PC32:
-        return S + A - P;
+    case TYPE::MIPS_32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::MIPS_64:
+      return S + A;
+    case TYPE::MIPS_TLS_DTPREL64:
+      return S + A - 0x8000;
+    case TYPE::MIPS_PC32:
+      return S + A - P;
     /* } */
 
     /* PPC64 { */
-      case TYPE::PPC64_ADDR32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::PPC64_ADDR64:
-        return S + A;
-      case TYPE::PPC64_REL32:
-        return (S + A - P) & 0xFFFFFFFF;
-      case TYPE::PPC64_REL64:
-        return S + A - P;
+    case TYPE::PPC64_ADDR32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::PPC64_ADDR64:
+      return S + A;
+    case TYPE::PPC64_REL32:
+      return (S + A - P) & 0xFFFFFFFF;
+    case TYPE::PPC64_REL64:
+      return S + A - P;
     /* } */
 
     /* PPC32 { */
-      case TYPE::PPC_ADDR32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::PPC_REL32:
-        return (S + A - P) & 0xFFFFFFFF;
+    case TYPE::PPC_ADDR32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::PPC_REL32:
+      return (S + A - P) & 0xFFFFFFFF;
     /* } */
 
     /* RISCV { */
-      case TYPE::RISCV_NONE:
-        return Q();
-      case TYPE::RISCV_32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::RISCV_32_PCREL:
-        return (S + A - P) & 0xFFFFFFFF;
-      case TYPE::RISCV_64:
-        return S + A;
-      case TYPE::RISCV_SET6:
-        return (A & 0xC0) | ((S + A) & 0x3F);
-      case TYPE::RISCV_SUB6:
-        return (A & 0xC0) | (((A & 0x3F) - (S + A)) & 0x3F);
-      case TYPE::RISCV_SET8:
-        return (S + A) & 0xFF;
-      case TYPE::RISCV_ADD8:
-        return (A + (S + A)) & 0xFF;
-      case TYPE::RISCV_SUB8:
-        return (A - (S + 1)) & 0xFF;
-      case TYPE::RISCV_SET16:
-        return (S + A) & 0xFFFF;
-      case TYPE::RISCV_ADD16:
-        return (A + (S + A)) & 0xFFFF;
-      case TYPE::RISCV_SUB16:
-        return (A - (S + A)) & 0xFFFF;
-      case TYPE::RISCV_SET32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::RISCV_ADD32:
-        return (A + (S + A)) & 0xFFFFFFFF;
-      case TYPE::RISCV_SUB32:
-        return (A - (S + A)) & 0xFFFFFFFF;
-      case TYPE::RISCV_ADD64:
-        return (A + (S + A));
-      case TYPE::RISCV_SUB64:
-        return (A - (S + A));
+    case TYPE::RISCV_NONE:
+      return Q();
+    case TYPE::RISCV_32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::RISCV_32_PCREL:
+      return (S + A - P) & 0xFFFFFFFF;
+    case TYPE::RISCV_64:
+      return S + A;
+    case TYPE::RISCV_SET6:
+      return (A & 0xC0) | ((S + A) & 0x3F);
+    case TYPE::RISCV_SUB6:
+      return (A & 0xC0) | (((A & 0x3F) - (S + A)) & 0x3F);
+    case TYPE::RISCV_SET8:
+      return (S + A) & 0xFF;
+    case TYPE::RISCV_ADD8:
+      return (A + (S + A)) & 0xFF;
+    case TYPE::RISCV_SUB8:
+      return (A - (S + 1)) & 0xFF;
+    case TYPE::RISCV_SET16:
+      return (S + A) & 0xFFFF;
+    case TYPE::RISCV_ADD16:
+      return (A + (S + A)) & 0xFFFF;
+    case TYPE::RISCV_SUB16:
+      return (A - (S + A)) & 0xFFFF;
+    case TYPE::RISCV_SET32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::RISCV_ADD32:
+      return (A + (S + A)) & 0xFFFFFFFF;
+    case TYPE::RISCV_SUB32:
+      return (A - (S + A)) & 0xFFFFFFFF;
+    case TYPE::RISCV_ADD64:
+      return (A + (S + A));
+    case TYPE::RISCV_SUB64:
+      return (A - (S + A));
     /* } */
 
     /* LoongArch { */
-      case TYPE::LARCH_NONE:
-        return Q();
-      case TYPE::LARCH_32:
-        return (S + A) & 0xFFFFFFFF;
-      case TYPE::LARCH_32_PCREL:
-        return (S + A - P) & 0xFFFFFFFF;
-      case TYPE::LARCH_64:
-        return S + A;
-      case TYPE::LARCH_ADD6:
-        return (Q() & 0xC0) | ((Q() + S + A) & 0x3F);
-      case TYPE::LARCH_SUB6:
-        return (Q() & 0xC0) | ((Q() - (S + A)) & 0x3F);
-      case TYPE::LARCH_ADD8:
-        return (Q() + (S + A)) & 0xFF;
-      case TYPE::LARCH_SUB8:
-        return (Q() - (S + A)) & 0xFF;
-      case TYPE::LARCH_ADD16:
-        return (Q() + (S + A)) & 0xFFFF;
-      case TYPE::LARCH_SUB16:
-        return (Q() - (S + A)) & 0xFFFF;
-      case TYPE::LARCH_ADD32:
-        return (Q() + (S + A)) & 0xFFFFFFFF;
-      case TYPE::LARCH_SUB32:
-        return (Q() - (S + A)) & 0xFFFFFFFF;
-      case TYPE::LARCH_ADD64:
-        return (Q() + (S + A));
-      case TYPE::LARCH_SUB64:
-        return (Q() - (S + A));
+    case TYPE::LARCH_NONE:
+      return Q();
+    case TYPE::LARCH_32:
+      return (S + A) & 0xFFFFFFFF;
+    case TYPE::LARCH_32_PCREL:
+      return (S + A - P) & 0xFFFFFFFF;
+    case TYPE::LARCH_64:
+      return S + A;
+    case TYPE::LARCH_ADD6:
+      return (Q() & 0xC0) | ((Q() + S + A) & 0x3F);
+    case TYPE::LARCH_SUB6:
+      return (Q() & 0xC0) | ((Q() - (S + A)) & 0x3F);
+    case TYPE::LARCH_ADD8:
+      return (Q() + (S + A)) & 0xFF;
+    case TYPE::LARCH_SUB8:
+      return (Q() - (S + A)) & 0xFF;
+    case TYPE::LARCH_ADD16:
+      return (Q() + (S + A)) & 0xFFFF;
+    case TYPE::LARCH_SUB16:
+      return (Q() - (S + A)) & 0xFFFF;
+    case TYPE::LARCH_ADD32:
+      return (Q() + (S + A)) & 0xFFFFFFFF;
+    case TYPE::LARCH_SUB32:
+      return (Q() - (S + A)) & 0xFFFFFFFF;
+    case TYPE::LARCH_ADD64:
+      return (Q() + (S + A));
+    case TYPE::LARCH_SUB64:
+      return (Q() - (S + A));
     /* } */
 
     default:
@@ -397,6 +390,7 @@ result<uint64_t> Relocation::resolve(uint64_t base_address) const {
   LIEF_DEBUG("Relocation {} is not supported", to_string(type()));
   return make_error_code(lief_errors::not_supported);
 }
+
 
 size_t Relocation::size() const {
   return get_reloc_size(type_);
