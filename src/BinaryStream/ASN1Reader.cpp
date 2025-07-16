@@ -454,13 +454,13 @@ std::string ASN1Reader::get_str_tag() {
 
 
 std::string ASN1Reader::tag2str(int tag) {
-#define HANDLE(X) do {     \
-  if (tag & MBEDTLS_##X) { \
-    tag_str += " | " #X;    \
-  }                        \
-} while(0)
-
   std::string tag_str;
+
+  #define HANDLE(X) do {     \
+    if ((static_cast<unsigned int>(tag) & MBEDTLS_##X) != 0) { \
+      tag_str += " | " #X;    \
+    }                        \
+  } while(0)
 
   HANDLE(ASN1_BOOLEAN);
   HANDLE(ASN1_INTEGER);
@@ -488,7 +488,8 @@ std::string ASN1Reader::tag2str(int tag) {
   }
 
   return tag_str.substr(3);
-#undef HANDLE
+  #undef HANDLE
 }
+
 
 }
