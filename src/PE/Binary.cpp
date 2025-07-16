@@ -1147,32 +1147,34 @@ span<const uint8_t> Binary::get_content_from_virtual_address(uint64_t virtual_ad
   uint64_t rva = virtual_address;
 
   if (addr_type == LIEF::Binary::VA_TYPES::VA || addr_type == LIEF::Binary::VA_TYPES::AUTO) {
-    const int64_t delta = virtual_address - optional_header().imagebase();
-
-    if (delta > 0 || addr_type == LIEF::Binary::VA_TYPES::VA) {
-      rva -= optional_header().imagebase();
+    const uint64_t image_base = optional_header().imagebase();
+    if (virtual_address >= image_base) {
+      rva -= image_base;
     }
   }
+
   const Section* section = section_from_rva(rva);
   if (section == nullptr) {
     LIEF_ERR("Can't find the section with the rva 0x{:x}", rva);
     return {};
   }
+
   span<const uint8_t> content = section->content();
   const uint64_t offset = rva - section->virtual_address();
   uint64_t checked_size = size;
+
   if ((offset + checked_size) > content.size()) {
     uint64_t delta_off = offset + checked_size - content.size();
     if (checked_size < delta_off) {
-        LIEF_ERR("Can't access section data due to a section end overflow.");
-        return {};
+      LIEF_ERR("Can't access section data due to a section end overflow.");
+      return {};
     }
     checked_size = checked_size - delta_off;
   }
 
   return {content.data() + offset, static_cast<size_t>(checked_size)};
-
 }
+
 
 void Binary::rich_header(const RichHeader& rich_header) {
   rich_header_ = std::make_unique<RichHeader>(rich_header);
