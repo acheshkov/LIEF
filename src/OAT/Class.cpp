@@ -120,10 +120,10 @@ bool Class::is_quickened(const DEX::Method& m) const {
     return false;
   }
 
-  uint32_t relative_index = std::distance(std::begin(methods), it_method_index);
-  return is_quickened(relative_index);
-
+  ptrdiff_t relative_index = std::distance(std::begin(methods), it_method_index);
+  return is_quickened(static_cast<uint32_t>(relative_index));
 }
+
 
 bool Class::is_quickened(uint32_t relative_index) const {
   if (type() == OAT_CLASS_TYPES::OAT_CLASS_NONE_COMPILED) {
