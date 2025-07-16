@@ -580,7 +580,7 @@ ok_error_t Builder::construct_resource(
     .write<uint32_t>(data.code_page())
     .write<uint32_t>(data.reserved())
   ;
-  ctx.offset_header = ios.tellp();
+  ctx.offset_header = static_cast<decltype(ctx.offset_header)>(ios.tellp());
 
   LIEF_DEBUG("[rsrc] writing data content at 0x{:04x} (depth={}, id={}, size=0x{:04x})",
              ctx.offset_data, data.depth(), data.id(), content.size());
@@ -589,9 +589,10 @@ ok_error_t Builder::construct_resource(
     .write(content.data(), content.size())
     .align(sizeof(uint32_t));
 
-  ctx.offset_data = ios.tellp();
+  ctx.offset_data = static_cast<decltype(ctx.offset_data)>(ios.tellp());
   return ok();
 }
+
 
 
 ok_error_t Builder::construct_resource(
