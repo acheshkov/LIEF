@@ -280,18 +280,18 @@ bool LayoutChecker::check_segments() {
     sizeof(details::section_32) : sizeof(details::section_64);
 
   for (const SegmentCommand& segment : binary.segments()) {
-    int32_t section_space = segment.size() - sizeof_segment_hdr;
+    int64_t section_space = static_cast<int64_t>(segment.size()) - static_cast<int64_t>(sizeof_segment_hdr);
     if (section_space < 0) {
       return error("load command is too small for LC_SEGMENT/64: {}",
                    segment.name());
     }
 
-    if ((section_space % sizeof_section_hdr) != 0) {
+    if ((section_space % static_cast<int64_t>(sizeof_section_hdr)) != 0) {
       return error("segment load command size {}: 0x{:04x} will not fit "
                    "whole number of sections", segment.name(), segment.size());
     }
 
-    if ((uint32_t)section_space != segment.numberof_sections() * sizeof_section_hdr) {
+    if (static_cast<uint64_t>(section_space) != static_cast<uint64_t>(segment.numberof_sections()) * sizeof_section_hdr) {
       return error("segment {} does not match nsects", segment.name(),
                    segment.numberof_sections());
     }
@@ -324,6 +324,7 @@ bool LayoutChecker::check_segments() {
 
   return true;
 }
+
 
 bool LayoutChecker::check_overlapping() {
   for (const SegmentCommand& lhs : binary.segments()) {
