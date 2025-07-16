@@ -19,10 +19,9 @@ namespace LIEF {
 namespace ELF {
 
 void init_c_segments(Elf_Binary_t* c_binary, Binary* binary) {
-
   Binary::it_segments segments = binary->segments();
   c_binary->segments = static_cast<Elf_Segment_t**>(
-      malloc((segments.size() + 1) * sizeof(Elf_Segment_t**)));
+      malloc((segments.size() + 1) * sizeof(Elf_Segment_t*)));
   for (size_t i = 0; i < segments.size(); ++i) {
     Segment& segment = segments[i];
 
@@ -41,8 +40,8 @@ void init_c_segments(Elf_Binary_t* c_binary, Binary* binary) {
   }
 
   c_binary->segments[segments.size()] = nullptr;
-
 }
+
 
 void destroy_segments(Elf_Binary_t* c_binary) {
   Elf_Segment_t **segments = c_binary->segments;
