@@ -450,9 +450,9 @@ class filter_iterator {
   }
 
   protected:
-  void next() {
+void next() {
     if (it_ == std::end(container_)) {
-      distance_ = container_.size();
+      distance_ = static_cast<std::make_signed_t<decltype(container_.size())>>(container_.size());
       return;
     }
 
@@ -462,8 +462,8 @@ class filter_iterator {
     } while(it_ != std::end(container_) &&
             !std::all_of(std::begin(filters_), std::end(filters_),
                          [this] (const filter_t& f) { return f(*it_); }));
+}
 
-  }
 
 
   mutable size_t size_c_ = 0;
