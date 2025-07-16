@@ -23,7 +23,7 @@ void init_c_import_entries(Pe_Import_t* c_import, Import& imp) {
   Import::it_entries entries = imp.entries();
 
   c_import->entries = static_cast<Pe_ImportEntry_t**>(
-      malloc((entries.size() + 1) * sizeof(Pe_ImportEntry_t**)));
+      malloc((entries.size() + 1) * sizeof(Pe_ImportEntry_t*)));
 
   for (size_t i = 0; i < entries.size(); ++i) {
     ImportEntry& import_entry = entries[i];
@@ -42,6 +42,7 @@ void init_c_import_entries(Pe_Import_t* c_import, Import& imp) {
   c_import->entries[entries.size()] = nullptr;
 
 }
+
 
 
 void destroy_import_entries(Pe_Import_t* c_import) {
