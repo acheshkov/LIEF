@@ -32,7 +32,8 @@
 namespace LIEF {
 namespace DEX {
 
-Header::Header() = default;
+Header::Header() : file_size_(0) {}
+
 Header::Header(const Header&) = default;
 Header& Header::operator=(const Header&) = default;
 
