@@ -22,7 +22,7 @@ void init_c_data_directories(Pe_Binary_t* c_binary, Binary* binary) {
   Binary::it_data_directories data_directories = binary->data_directories();
 
   c_binary->data_directories = static_cast<Pe_DataDirectory_t**>(
-      malloc((data_directories.size() + 1) * sizeof(Pe_DataDirectory_t**)));
+      malloc((data_directories.size() + 1) * sizeof(Pe_DataDirectory_t*)));
 
   for (size_t i = 0; i < data_directories.size(); ++i) {
 
@@ -32,9 +32,8 @@ void init_c_data_directories(Pe_Binary_t* c_binary, Binary* binary) {
   }
   c_binary->data_directories[data_directories.size()] = nullptr;
 
-
-
 }
+
 
 
 
