@@ -169,7 +169,6 @@ uint32_t Class::method_offsets_index(const DEX::Method& m) const {
 }
 
 uint32_t Class::method_offsets_index(uint32_t relative_index) const {
-
   if (!is_quickened(relative_index) || type() == OAT_CLASS_TYPES::OAT_CLASS_NONE_COMPILED) {
     return UINT_MAX;
   }
@@ -183,11 +182,11 @@ uint32_t Class::method_offsets_index(uint32_t relative_index) const {
     const uint32_t partial_word_bits = relative_index & 0x1f;
     uint32_t count = 0;
     for (uint32_t word = 0; word < bitmap_end_idx; ++word) {
-      count += __builtin_popcount(method_bitmap_[word]);
+      count += static_cast<uint32_t>(__builtin_popcount(method_bitmap_[word]));
     }
 
     if (partial_word_bits != 0) {
-      count += __builtin_popcount(method_bitmap_[bitmap_end_idx] & ~(0xffffffffu << partial_word_bits));
+      count += static_cast<uint32_t>(__builtin_popcount(method_bitmap_[bitmap_end_idx] & ~(0xffffffffu << partial_word_bits)));
     }
 
     return count;
@@ -195,6 +194,7 @@ uint32_t Class::method_offsets_index(uint32_t relative_index) const {
 
   return UINT_MAX;
 }
+
 
 uint32_t Class::relative_index(const DEX::Method& m) const {
   if (!has_dex_class()) {
