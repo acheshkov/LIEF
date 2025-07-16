@@ -25,7 +25,8 @@ namespace ART {
 Header::Header(const Header&) = default;
 Header& Header::operator=(const Header&) = default;
 
-Header::Header() = default;
+Header::Header() : nb_sections_(0) {}
+
 
 Header::magic_t Header::magic() const {
   return magic_;
