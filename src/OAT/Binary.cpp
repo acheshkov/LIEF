@@ -139,8 +139,14 @@ std::string Binary::dex2dex_json_info() {
   json mapping = json::object();
 
   for (const DEX::File& dex_file : dex_files()) {
-    json dex2dex = json::parse(dex_file.dex2dex_json_info());
-    mapping[dex_file.name()] = dex2dex;
+    std::string info_str = dex_file.dex2dex_json_info();
+    if (!info_str.empty()) {
+      bool success = json::accept(info_str);
+      if (success) {
+        json dex2dex = json::parse(info_str);
+        mapping[dex_file.name()] = std::move(dex2dex);
+      }
+    }
   }
 
   return mapping.dump();
@@ -149,6 +155,7 @@ std::string Binary::dex2dex_json_info() {
 #endif
 
 }
+
 
 void Binary::add_class(std::unique_ptr<Class> cls) {
   classes_.emplace(cls->fullname(), cls.get());
