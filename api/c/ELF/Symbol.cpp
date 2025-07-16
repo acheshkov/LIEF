@@ -46,12 +46,28 @@ void init_c_dynamic_symbols(Elf_Binary_t* c_binary, Binary* binary) {
 void init_c_symtab_symbols(Elf_Binary_t* c_binary, Binary* binary) {
   Binary::it_symtab_symbols static_symb = binary->symtab_symbols();
 
+  size_t num_symbols = static_symb.size();
   c_binary->symtab_symbols = static_cast<Elf_Symbol_t**>(
-      malloc((static_symb.size() + 1) * sizeof(Elf_Symbol_t**)));
+      malloc((num_symbols + 1) * sizeof(Elf_Symbol_t*)));
 
-  for (size_t i = 0; i < static_symb.size(); ++i) {
+  if (!c_binary->symtab_symbols) {
+    return; // Allocation failed, handle error or exit
+  }
+
+  for (size_t i = 0; i < num_symbols; ++i) {
     Symbol& b_sym = static_symb[i];
-    c_binary->symtab_symbols[i]              = static_cast<Elf_Symbol_t*>(malloc(sizeof(Elf_Symbol_t)));
+    c_binary->symtab_symbols[i] = static_cast<Elf_Symbol_t*>(malloc(sizeof(Elf_Symbol_t)));
+    if (!c_binary->symtab_symbols[i]) {
+      // Handle error: memory allocation failed for symbol
+      // Optionally free previously allocated symbols before returning
+      for (size_t j = 0; j < i; ++j) {
+        free(c_binary->symtab_symbols[j]);
+      }
+      free(c_binary->symtab_symbols);
+      c_binary->symtab_symbols = nullptr;
+      return;
+    }
+
     c_binary->symtab_symbols[i]->name        = b_sym.name().c_str();
     c_binary->symtab_symbols[i]->type        = static_cast<uint32_t>(b_sym.type());
     c_binary->symtab_symbols[i]->binding     = static_cast<uint32_t>(b_sym.binding());
@@ -63,9 +79,10 @@ void init_c_symtab_symbols(Elf_Binary_t* c_binary, Binary* binary) {
     c_binary->symtab_symbols[i]->is_exported = b_sym.is_exported();
     c_binary->symtab_symbols[i]->is_imported = b_sym.is_imported();
   }
-  c_binary->symtab_symbols[static_symb.size()] = nullptr;
 
+  c_binary->symtab_symbols[num_symbols] = nullptr;
 }
+
 
 
 
