@@ -21,14 +21,37 @@ void init_c_segments(Macho_Binary_t* c_binary, Binary* binary) {
   Binary::it_segments segments = binary->segments();
 
   c_binary->segments = static_cast<Macho_Segment_t**>(
-      malloc((segments.size() + 1) * sizeof(Macho_Segment_t**)));
+      malloc((segments.size() + 1) * sizeof(Macho_Segment_t*)));
+  if (!c_binary->segments) {
+    return;
+  }
 
   for (size_t i = 0; i < segments.size(); ++i) {
     SegmentCommand& segment = segments[i];
 
     c_binary->segments[i] = static_cast<Macho_Segment_t*>(malloc(sizeof(Macho_Segment_t)));
+    if (!c_binary->segments[i]) {
+      // Free previously allocated memory before returning
+      for (size_t j = 0; j < i; ++j) {
+        free(c_binary->segments[j]->content);
+      }
+      free(c_binary->segments);
+      c_binary->segments = nullptr;
+      return;
+    }
+
     span<const uint8_t> segment_content = segment.content();
-    auto* content = static_cast<uint8_t*>(malloc(segment_content.size() * sizeof(uint8_t)));
+    auto* content = static_cast<uint8_t*>(malloc(segment_content.size()));
+    if (!content) {
+      // Free previously allocated memory before returning
+      for (size_t j = 0; j <= i; ++j) {
+        free(c_binary->segments[j]);
+      }
+      free(c_binary->segments);
+      c_binary->segments = nullptr;
+      return;
+    }
+
     std::copy(
         std::begin(segment_content),
         std::end(segment_content),
@@ -45,12 +68,12 @@ void init_c_segments(Macho_Binary_t* c_binary, Binary* binary) {
     c_binary->segments[i]->flags             = segment.flags();
     c_binary->segments[i]->content           = content;
     c_binary->segments[i]->size              = segment_content.size();
-    c_binary->segments[i]->sections          = nullptr; //TODO
+    c_binary->segments[i]->sections          = nullptr; // TODO
   }
 
   c_binary->segments[segments.size()] = nullptr;
-
 }
+
 
 
 
