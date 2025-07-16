@@ -528,7 +528,7 @@ ok_error_t Builder::construct_resource(
     .write<uint16_t>(dir.numberof_name_entries())
     .write<uint16_t>(dir.numberof_id_entries())
   ;
-  ctx.offset_header = ios.tellp();
+  ctx.offset_header = static_cast<std::uint32_t>(ios.tellp());
 
   uint32_t current_offset = ctx.offset_header;
   ctx.offset_header += dir.childs().size() * sizeof(details::pe_resource_directory_entries);
@@ -544,7 +544,7 @@ ok_error_t Builder::construct_resource(
         .seekp(ctx.offset_name)
         .write<uint16_t>(name.size())
         .write(name, /*with_null_char=*/false);
-      ctx.offset_name = ios.tellp();
+      ctx.offset_name = static_cast<std::uint32_t>(ios.tellp());
     }
 
     const uint32_t mask = child.is_directory() ? 0x80000000 : 0;
@@ -554,13 +554,14 @@ ok_error_t Builder::construct_resource(
       .write<uint32_t>(child.id())
       .write<uint32_t>(mask | ctx.offset_header)
     ;
-    current_offset = ios.tellp();
+    current_offset = static_cast<std::uint32_t>(ios.tellp());
 
     ++ctx.depth;
     construct_resource(ios, child, ctx);
   }
   return ok();
 }
+
 
 
 ok_error_t Builder::construct_resource(
