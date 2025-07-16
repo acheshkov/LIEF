@@ -780,7 +780,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("codeview - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("codeview - new size      0x{:06x}", ios_cv.size());
 
-      const int32_t delta = (int32_t)ios_cv.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_cv.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -791,7 +791,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_cv);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -814,7 +814,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("pogo - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("pogo - new size      0x{:06x}", ios_pogo.size());
 
-      const int32_t delta = (int32_t)ios_pogo.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_pogo.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -825,7 +825,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_pogo);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -848,7 +848,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("repro - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("repro - new size      0x{:06x}", ios_repro.size());
 
-      const int32_t delta = (int32_t)ios_repro.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_repro.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -859,7 +859,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_repro);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -882,7 +882,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("pdbchecksum - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("pdbchecksum - new size      0x{:06x}", ios_repro.size());
 
-      const int32_t delta = (int32_t)ios_repro.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_repro.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -893,7 +893,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_repro);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -916,7 +916,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("vcfeature - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("vcfeature - new size      0x{:06x}", ios_vcfeat.size());
 
-      const int32_t delta = (int32_t)ios_vcfeat.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_vcfeat.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -927,7 +927,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_vcfeat);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -950,7 +950,7 @@ ok_error_t Builder::build_debug_info() {
       LIEF_DEBUG("ExDllCharacteristics - original size 0x{:06x}", dbg->sizeof_data());
       LIEF_DEBUG("ExDllCharacteristics - new size      0x{:06x}", ios_exdll.size());
 
-      const int32_t delta = (int32_t)ios_exdll.size() - dbg->sizeof_data();
+      int32_t delta = (int32_t)ios_exdll.size() - dbg->sizeof_data();
 
       if (delta <= 0) {
         std::memset(payload.data(), 0, payload.size());
@@ -961,7 +961,7 @@ ok_error_t Builder::build_debug_info() {
         ;
       } else {
         LIEF_DEBUG("Need to relocate entry #{} +{} bytes", i, delta);
-        const size_t payload_off = payload_stream.tellp();
+        size_t payload_off = static_cast<size_t>(payload_stream.tellp());
         payload_stream.write(ios_exdll);
         header_stream
           .record_fixup(FX_BASE_RVA)
@@ -1046,6 +1046,7 @@ ok_error_t Builder::build_debug_info() {
   debug_dir->size(header_stream.size());
   return ok();
 }
+
 
 
 ok_error_t Builder::build_exports() {
