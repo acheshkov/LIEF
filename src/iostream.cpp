@@ -28,16 +28,17 @@ size_t vector_iostream::uleb128_size(uint64_t value) {
 
 size_t vector_iostream::sleb128_size(int64_t value) {
   size_t size = 0;
-  int sign = value >> (8 * sizeof(value) - 1);
+  int64_t sign = value >> (8 * sizeof(value) - 1);
   bool is_more;
   do {
-    size_t byte = value & 0x7F;
+    uint8_t byte = static_cast<uint8_t>(value & 0x7F);
     value >>= 7;
-    is_more = value != sign || ((byte ^ sign) & 0x40) != 0;
+    is_more = value != sign || ((byte ^ static_cast<uint8_t>(sign)) & 0x40) != 0;
     size += sizeof(int8_t);
   } while (is_more);
   return size;
 }
+
 
 vector_iostream& vector_iostream::put(uint8_t c) {
   if (raw_->size() < (static_cast<size_t>(tellp()) + 1)) {
