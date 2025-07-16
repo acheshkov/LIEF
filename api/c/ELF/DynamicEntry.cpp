@@ -26,128 +26,133 @@ namespace LIEF {
 namespace ELF {
 
 void init_c_dynamic_entries(Elf_Binary_t* c_binary, Binary* binary) {
+  if (!binary) return;
 
   Binary::it_dynamic_entries dyn_entries = binary->dynamic_entries();
   c_binary->dynamic_entries = static_cast<Elf_DynamicEntry_t**>(
-      malloc((dyn_entries.size() + 1) * sizeof(Elf_DynamicEntry_t**)));
+      malloc((dyn_entries.size() + 1) * sizeof(Elf_DynamicEntry_t*)));
+  if (!c_binary->dynamic_entries) return;
 
   for (size_t i = 0; i < dyn_entries.size(); ++i) {
     DynamicEntry& entry = dyn_entries[i];
     switch(entry.tag()) {
-      case DynamicEntry::TAG::NEEDED:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_Library_t*>(
-              malloc(sizeof(Elf_DynamicEntry_Library_t)));
+      case DynamicEntry::TAG::NEEDED: {
+        auto* e = static_cast<Elf_DynamicEntry_Library_t*>(
+            malloc(sizeof(Elf_DynamicEntry_Library_t)));
+        if (!e) continue;
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          e->name  = reinterpret_cast<DynamicEntryLibrary*>(&entry)->name().c_str();
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        e->name  = reinterpret_cast<DynamicEntryLibrary*>(&entry)->name().c_str();
 
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
-          break;
-        }
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
 
-      case DynamicEntry::TAG::SONAME:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_SharedObject_t*>(
-              malloc(sizeof(Elf_DynamicEntry_SharedObject_t)));
+      case DynamicEntry::TAG::SONAME: {
+        auto* e = static_cast<Elf_DynamicEntry_SharedObject_t*>(
+            malloc(sizeof(Elf_DynamicEntry_SharedObject_t)));
+        if (!e) continue;
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          e->name  = reinterpret_cast<DynamicSharedObject*>(&entry)->name().c_str();
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        e->name  = reinterpret_cast<DynamicSharedObject*>(&entry)->name().c_str();
 
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
-          break;
-        }
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
 
-      case DynamicEntry::TAG::RPATH:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_Rpath_t*>(
-              malloc(sizeof(Elf_DynamicEntry_Rpath_t)));
+      case DynamicEntry::TAG::RPATH: {
+        auto* e = static_cast<Elf_DynamicEntry_Rpath_t*>(
+            malloc(sizeof(Elf_DynamicEntry_Rpath_t)));
+        if (!e) continue;
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          e->rpath = reinterpret_cast<DynamicEntryRpath*>(&entry)->rpath().c_str();
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        e->rpath = reinterpret_cast<DynamicEntryRpath*>(&entry)->rpath().c_str();
 
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
 
-          break;
-        }
+      case DynamicEntry::TAG::RUNPATH: {
+        auto* e = static_cast<Elf_DynamicEntry_RunPath_t*>(
+            malloc(sizeof(Elf_DynamicEntry_RunPath_t)));
+        if (!e) continue;
 
-      case DynamicEntry::TAG::RUNPATH:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_RunPath_t*>(
-              malloc(sizeof(Elf_DynamicEntry_RunPath_t)));
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value   = entry.value();
+        e->runpath = reinterpret_cast<DynamicEntryRunPath*>(&entry)->runpath().c_str();
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value   = entry.value();
-          e->runpath = reinterpret_cast<DynamicEntryRunPath*>(&entry)->runpath().c_str();
-
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
-
-          break;
-        }
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
 
       case DynamicEntry::TAG::INIT_ARRAY:
       case DynamicEntry::TAG::FINI_ARRAY:
-      case DynamicEntry::TAG::PREINIT_ARRAY:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_Array_t*>(
-              malloc(sizeof(Elf_DynamicEntry_Array_t)));
+      case DynamicEntry::TAG::PREINIT_ARRAY: {
+        auto* e = static_cast<Elf_DynamicEntry_Array_t*>(
+            malloc(sizeof(Elf_DynamicEntry_Array_t)));
+        if (!e) continue;
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          const std::vector<uint64_t>& array = reinterpret_cast<DynamicEntryArray*>(&entry)->array();
-          e->array = static_cast<uint64_t*>(malloc((array.size() + 1) * sizeof(uint64_t)));
-          for (size_t i = 0; i < array.size(); ++i) {
-            e->array[i] = array[i];
-          }
-          e->array[array.size()] = 0;
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
-
-          break;
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        const std::vector<uint64_t>& array = reinterpret_cast<DynamicEntryArray*>(&entry)->array();
+        e->array = static_cast<uint64_t*>(malloc((array.size() + 1) * sizeof(uint64_t)));
+        if (!e->array) {
+          free(e);
+          continue;
         }
 
-      case DynamicEntry::TAG::FLAGS:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_Flags_t*>(
-              malloc(sizeof(Elf_DynamicEntry_Flags_t)));
-
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          const DynamicEntryFlags::flags_list_t& flags = reinterpret_cast<DynamicEntryFlags*>(&entry)->flags();
-
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
-
-          break;
+        for (size_t j = 0; j < array.size(); ++j) {
+          e->array[j] = array[j];
         }
+        e->array[array.size()] = 0;
 
-      case DynamicEntry::TAG::FLAGS_1:
-        {
-          auto* e = static_cast<Elf_DynamicEntry_Flags_t*>(
-              malloc(sizeof(Elf_DynamicEntry_Flags_t)));
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
 
-          e->tag   = static_cast<uint64_t>(entry.tag());
-          e->value = entry.value();
-          const DynamicEntryFlags::flags_list_t& flags = reinterpret_cast<DynamicEntryFlags*>(&entry)->flags();
-          c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+      case DynamicEntry::TAG::FLAGS: {
+        auto* e = static_cast<Elf_DynamicEntry_Flags_t*>(
+            malloc(sizeof(Elf_DynamicEntry_Flags_t)));
+        if (!e) continue;
 
-          break;
-        }
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        const DynamicEntryFlags::flags_list_t& flags = reinterpret_cast<DynamicEntryFlags*>(&entry)->flags();
 
-      default:
-        {
-          c_binary->dynamic_entries[i] =
-            static_cast<Elf_DynamicEntry_t*>(malloc(sizeof(Elf_DynamicEntry_t)));
-          c_binary->dynamic_entries[i]->tag = static_cast<uint64_t>(entry.tag());
-          c_binary->dynamic_entries[i]->value = entry.value();
-          break;
-        }
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
+
+      case DynamicEntry::TAG::FLAGS_1: {
+        auto* e = static_cast<Elf_DynamicEntry_Flags_t*>(
+            malloc(sizeof(Elf_DynamicEntry_Flags_t)));
+        if (!e) continue;
+
+        e->tag   = static_cast<uint64_t>(entry.tag());
+        e->value = entry.value();
+        const DynamicEntryFlags::flags_list_t& flags = reinterpret_cast<DynamicEntryFlags*>(&entry)->flags();
+
+        c_binary->dynamic_entries[i] = reinterpret_cast<Elf_DynamicEntry_t*>(e);
+        break;
+      }
+
+      default: {
+        c_binary->dynamic_entries[i] =
+          static_cast<Elf_DynamicEntry_t*>(malloc(sizeof(Elf_DynamicEntry_t)));
+        if (!c_binary->dynamic_entries[i]) continue;
+        c_binary->dynamic_entries[i]->tag = static_cast<uint64_t>(entry.tag());
+        c_binary->dynamic_entries[i]->value = entry.value();
+        break;
+      }
     }
   }
 
   c_binary->dynamic_entries[dyn_entries.size()] = nullptr;
 }
+
 
 
 
