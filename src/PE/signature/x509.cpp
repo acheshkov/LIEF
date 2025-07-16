@@ -706,11 +706,12 @@ std::vector<oid_t> x509::certificate_policies() const {
 }
 
 bool x509::is_ca() const {
-  if ((x509_cert_->private_ext_types & MBEDTLS_X509_EXT_BASIC_CONSTRAINTS) == 0) {
+  if ((static_cast<unsigned int>(x509_cert_->private_ext_types) & MBEDTLS_X509_EXT_BASIC_CONSTRAINTS) == 0) {
     return true;
   }
   return x509_cert_->private_ca_istrue != 0;
 }
+
 
 std::vector<x509::KEY_USAGE> x509::key_usage() const {
   static const std::map<uint32_t, KEY_USAGE> MBEDTLS_MAP = {
