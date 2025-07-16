@@ -387,10 +387,10 @@ void Binary::remove(const Section& section, bool clear) {
   }
 
   std::unique_ptr<Section>& to_remove = *it_section;
-  const size_t section_index = std::distance(std::begin(sections_), it_section);
+  const ptrdiff_t section_index = std::distance(std::begin(sections_), it_section);
 
-  if (section_index < (sections_.size() - 1) && section_index > 0) {
-    std::unique_ptr<Section>& previous = sections_[section_index - 1];
+  if (section_index < static_cast<ptrdiff_t>(sections_.size() - 1) && section_index > 0) {
+    std::unique_ptr<Section>& previous = sections_[static_cast<size_t>(section_index) - 1];
     const size_t raw_size_gap = (to_remove->offset() + to_remove->size()) - (previous->offset() + previous->size());
     previous->size(previous->size() + raw_size_gap);
 
@@ -398,7 +398,6 @@ void Binary::remove(const Section& section, bool clear) {
                                   (previous->virtual_address() + previous->virtual_size());
     previous->virtual_size(previous->virtual_size() + vsize_size_gap);
   }
-
 
   if (clear) {
     to_remove->clear(0);
@@ -411,6 +410,7 @@ void Binary::remove(const Section& section, bool clear) {
   optional_header().sizeof_headers(sizeof_headers());
   optional_header().sizeof_image(static_cast<uint32_t>(virtual_size()));
 }
+
 
 result<uint64_t> Binary::make_space_for_new_section() {
   const uint32_t shift_value = align(sizeof(details::pe_section), optional_header().file_alignment());
